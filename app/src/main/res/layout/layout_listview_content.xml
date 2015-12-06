@@ -4,40 +4,26 @@
     android:orientation="horizontal"
     android:background="#ffffff"
     android:layout_height="wrap_content">
-    <ImageView
-        android:id="@+id/iv_photo"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:visibility="gone"
-        android:src="@mipmap/ic_launcher"
-        android:layout_gravity="center_vertical"
-        />
-   <TextView
-       android:id="@+id/tv_content"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       android:text="test"
-       android:padding="3dp"
-       android:visibility="gone"
-       android:gravity="center_vertical"
-       />
-<!-- -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="我是标题"
-        android:padding="8dp"
+        android:maxLength="8"
+        android:padding="10dp"
+        android:textSize="@dimen/text_big"
+
         android:id="@+id/tv_title"
         android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/iv_photo" />
+         />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="2015-12-04 18:10"
-        android:padding="8dp"
+        android:padding="10dp"
+        android:textSize="@dimen/text_small"
         android:id="@+id/tv_time"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true" />
@@ -45,10 +31,11 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="5dp"
+        android:padding="12dp"
+        android:textSize="@dimen/text_base"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="我是内容我是内容我是内容我是内内容我是我是内容我是容我是内容我是内容我是内容我是内容我是内容我是内容我是内容我是内容"
-        android:id="@+id/tv_content1"
+        android:id="@+id/tv_content"
         android:layout_below="@+id/tv_title"
          />
 
@@ -57,8 +44,14 @@
         android:layout_height="wrap_content"
         android:text="分享"
         android:padding="5dp"
+
         android:id="@+id/btn_share"
-        android:layout_below="@id/tv_content1"
+        android:layout_below="@id/tv_content"
         android:layout_alignParentEnd="true" />
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="10dp"-->
+        <!--android:layout_below="@id/btn_share"-->
+        <!--android:background="@color/backgroundColor"/>-->
 
 </RelativeLayout>

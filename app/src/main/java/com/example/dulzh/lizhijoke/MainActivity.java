@@ -14,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AbsListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.dulzh.lizhijoke.adapter.MainAdapter;
@@ -38,9 +39,8 @@ public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, LoadMoreListView.OnLoadMoreListener, SwipeRefreshLayout.OnRefreshListener {
 
 
-    int curNum = 0;
     private Handler mHandler = new Handler();
-//    private ArrayList<Map<String, Object>> mData = new ArrayList<Map<String, Object>>();
+    //    private ArrayList<Map<String, Object>> mData = new ArrayList<Map<String, Object>>();
     private ArrayList<JokeInfoBean.ShowapiResBodyEntity.ContentlistEntity> beanList = new ArrayList<JokeInfoBean.ShowapiResBodyEntity.ContentlistEntity>();
     private MainAdapter myAdapter;
 
@@ -73,8 +73,12 @@ public class MainActivity extends BaseActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+
         // 获取loadmorelistview，实现加载更多监听事件
         loadMoreListView = (LoadMoreListView) findViewById(R.id.loadMoreListView);
+        TextView textView = (TextView) findViewById(R.id.tv_no_data);
+        loadMoreListView.setEmptyView(textView);
+
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.mSwipeRefreshLayout);
         mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
@@ -90,15 +94,15 @@ public class MainActivity extends BaseActivity
 //            listItem.put("text", "Item " + i);
 //            mData.add(listItem);
 //        }
-        requestData();
-
+        requestData(1);
         //添加listview的adapter
         myAdapter = new MainAdapter(this, beanList);
         loadMoreListView.setAdapter(myAdapter);
 
+        myAdapter.notifyDataSetChanged();
     }
 
-    private void requestData() {
+    private void requestData(int page) {
         RequestParams params = new RequestParams(Common.URL_JOKEINFO);
         params.addQueryStringParameter("page", Integer.toString(page));
         params.addHeader("apikey", MyApplication.API_KEY);
@@ -136,14 +140,15 @@ public class MainActivity extends BaseActivity
                 }.getType();
                 JokeInfoBean jokeInfoBean = gson.fromJson(result, type);
                 List<JokeInfoBean.ShowapiResBodyEntity.ContentlistEntity> list = jokeInfoBean.getShowapi_res_body().getContentlist();
+                //没必要再写一个beanlist存储bean
                 for (JokeInfoBean.ShowapiResBodyEntity.ContentlistEntity bean : list) {
                     beanList.add(bean);
                 }
+                myAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onError(Throwable ex, boolean isOnCallback) {
-                Toast.makeText(MainActivity.this, isOnCallback + "", Toast.LENGTH_LONG).show();
                 boolean hasError = true;
                 if (ex instanceof HttpException) { // 网络错误
                     HttpException httpEx = (HttpException) ex;
@@ -199,16 +204,15 @@ public class MainActivity extends BaseActivity
 //
 //        }
 //    }
-
-
     @Override
     public void onRefresh() {
+
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                beanList.clear();
                 mSwipeRefreshLayout.setRefreshing(true); //请求开始的时候
-//                getNewTopData();
-                myAdapter.notifyDataSetChanged();
+                requestData(1);
                 mSwipeRefreshLayout.setRefreshing(false); // xx 请求结束的时候
             }
         }, 1000);
@@ -219,16 +223,12 @@ public class MainActivity extends BaseActivity
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                curNum++;
-                if (curNum <= 2) {
-//                    getNewBottomData();
-                    myAdapter.notifyDataSetChanged();
-                    loadMoreListView.onLoadMoreComplete();  //false
-                    loadMoreListView.setNoMoreToLoad(false); //有可加载数据
-                } else {
-                    loadMoreListView.setNoMoreToLoad(true); //数据全部加载完成
+                page++;
+                requestData(page);
+                loadMoreListView.onLoadMoreComplete();  //false
+                loadMoreListView.setNoMoreToLoad(false); //有可加载数据
+//                loadMoreListView.setNoMoreToLoad(true); //数据全部加载完成
 
-                }
             }
         }, 1000);
     }

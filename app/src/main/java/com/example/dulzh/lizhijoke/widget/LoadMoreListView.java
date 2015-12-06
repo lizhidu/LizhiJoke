@@ -3,6 +3,7 @@ package com.example.dulzh.lizhijoke.widget;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AbsListView;
@@ -32,6 +33,15 @@ public class LoadMoreListView extends ListView implements AbsListView.OnScrollLi
     private ProgressBar mLoadingProgressBar;
     private TextView mNoMoreTextView;
 
+
+    //初始化可拉动y轴方向距离
+    private static final int MAX_Y_OVERSCROLL_DISTANCE = 50;
+    //实际可上下拉动Y轴上的距离
+    private int mMaxYOverscrollDistance;
+    //上下文环境
+    private Context c;
+
+
     public LoadMoreListView(Context context) {
         super(context);
         init();
@@ -45,6 +55,11 @@ public class LoadMoreListView extends ListView implements AbsListView.OnScrollLi
     public LoadMoreListView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
+    }
+
+    @Override
+    protected boolean overScrollBy(int deltaX, int deltaY, int scrollX, int scrollY, int scrollRangeX, int scrollRangeY, int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
+        return super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX, scrollRangeY, maxOverScrollX, mMaxYOverscrollDistance, isTouchEvent);
     }
 
     @Override
@@ -93,7 +108,8 @@ public class LoadMoreListView extends ListView implements AbsListView.OnScrollLi
     }
 
     private void init() {
-        final Context c = getContext();
+        c = getContext();
+        initBounceListView();
         LayoutInflater inflater = LayoutInflater.from(c);
 
         mLoadMoreFooterView = inflater.inflate(R.layout.footer_load_more, null);
@@ -109,9 +125,16 @@ public class LoadMoreListView extends ListView implements AbsListView.OnScrollLi
         super.setOnScrollListener(this);
     }
 
+    //根据屏幕设置拉动的距离大小
+    private void initBounceListView() {
+        final DisplayMetrics metrics = c.getResources().getDisplayMetrics();
+        final float density = metrics.density;
+        mMaxYOverscrollDistance = (int) (density * MAX_Y_OVERSCROLL_DISTANCE);
+    }
+
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
-        if (scrollState == OnScrollListener.SCROLL_STATE_IDLE ) {
+        if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
             view.invalidateViews();
         }
 
@@ -151,7 +174,7 @@ public class LoadMoreListView extends ListView implements AbsListView.OnScrollLi
         mIsLoadMore = false; //当在加载数据的时候，设置mIsLoadMore ＝ false，不允许加载（重复）
     }
 
-   //设置加载更多，true 表示没有数据加载，false ，表示有可加载数据
+    //设置加载更多，true 表示没有数据加载，false ，表示有可加载数据
     public void setNoMoreToLoad(boolean noMoreToLoad) {
         mNoMoreLoad = noMoreToLoad;
         if (noMoreToLoad) {
@@ -162,6 +185,7 @@ public class LoadMoreListView extends ListView implements AbsListView.OnScrollLi
             mNoMoreTextView.setVisibility(GONE);
         }
     }
+
     //定义接口，子类实现，并且重写方法loadmore（）
     public interface OnLoadMoreListener {
         void onLoadMore(AbsListView view);
