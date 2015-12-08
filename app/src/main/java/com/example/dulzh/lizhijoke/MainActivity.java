@@ -3,22 +3,27 @@ package com.example.dulzh.lizhijoke;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.AbsListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.dulzh.lizhijoke.adapter.MainAdapter;
 import com.example.dulzh.lizhijoke.bean.JokeInfoBean;
+import com.example.dulzh.lizhijoke.fragment.HomeFragment;
 import com.example.dulzh.lizhijoke.utils.Common;
 import com.example.dulzh.lizhijoke.widget.LoadMoreListView;
 import com.google.gson.Gson;
@@ -30,30 +35,36 @@ import org.xutils.ex.HttpException;
 import org.xutils.http.RequestParams;
 import org.xutils.x;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, LoadMoreListView.OnLoadMoreListener, SwipeRefreshLayout.OnRefreshListener {
 
+    @Bind(R.id.tabs)
+    TabLayout tabs;
+    @Bind(R.id.container)
+    ViewPager container;
 
-    private Handler mHandler = new Handler();
-    //    private ArrayList<Map<String, Object>> mData = new ArrayList<Map<String, Object>>();
-    private ArrayList<JokeInfoBean.ShowapiResBodyEntity.ContentlistEntity> beanList = new ArrayList<JokeInfoBean.ShowapiResBodyEntity.ContentlistEntity>();
-    private MainAdapter myAdapter;
 
-    private LoadMoreListView loadMoreListView;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private static int page = 1;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        container.setAdapter(mSectionsPagerAdapter);
+        tabs.setupWithViewPager(container);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -72,20 +83,32 @@ public class MainActivity extends BaseActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+//        View headerLayout = LayoutInflater.from(this).inflate(R.layout.nav_header_main, null);
+//        navigationView.addHeaderView(headerLayout);
+//        CircleImageView circleImageView = (CircleImageView) headerLayout.findViewById(R.id.circleImageView);
+//        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) circleImageView.getLayoutParams();
+//        layoutParams.width = 250;
+//        layoutParams.height = 250;
+//        layoutParams.topMargin = 80;
+//        circleImageView.setLayoutParams(layoutParams);
+//        circleImageView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                LogUtil.d("头像点击。。。");
+//            }
+//        });
+        View header = navigationView.getHeaderView(0);
+        CircleImageView circleImageView = (CircleImageView) header.findViewById(R.id.circleImageView);
+        circleImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LogUtil.d("头像");
+            }
+        });
 
 
-        // 获取loadmorelistview，实现加载更多监听事件
-        loadMoreListView = (LoadMoreListView) findViewById(R.id.loadMoreListView);
-        TextView textView = (TextView) findViewById(R.id.tv_no_data);
-        loadMoreListView.setEmptyView(textView);
 
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.mSwipeRefreshLayout);
-        mSwipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
-                android.R.color.holo_green_light,
-                android.R.color.holo_orange_light,
-                android.R.color.holo_red_light);
-        loadMoreListView.setOnLoadMoreListener(this);
-        mSwipeRefreshLayout.setOnRefreshListener(this);
+
 
         //模拟数据
 //        for (int i = 0; i < 20; i++) {
@@ -94,89 +117,11 @@ public class MainActivity extends BaseActivity
 //            listItem.put("text", "Item " + i);
 //            mData.add(listItem);
 //        }
-        requestData(1);
-        //添加listview的adapter
-        myAdapter = new MainAdapter(this, beanList);
-        loadMoreListView.setAdapter(myAdapter);
-
-        myAdapter.notifyDataSetChanged();
-    }
-
-    private void requestData(int page) {
-        RequestParams params = new RequestParams(Common.URL_JOKEINFO);
-        params.addQueryStringParameter("page", Integer.toString(page));
-        params.addHeader("apikey", MyApplication.API_KEY);
-        x.http().get(params, new Callback.CommonCallback<String>() {
-
-            private boolean hasError = false;
-            private String result = null;
-
-            @Override
-            public void onSuccess(String result) {
-                this.result = result;
-
-//                {
-//                    "showapi_res_code": 0,
-//                        "showapi_res_error": "",
-//                        "showapi_res_body": {
-//                    "allNum": 13062,
-//                            "allPages": 654,
-//                            "contentlist": [
-//                    {
-//                        "ct": "2015-12-04 18:10:18.974",
-//                            "text": "晚上看到女神在线，我发了一个信息给她：”在吗？”十分钟后女神回道：”在拉，有事吗？”天哪！女神居然回复我了！我按耐住激动的心情回复：”那你先拉，拉完再聊。”一个小时过去了，女神怎么还没拉完？",
-//                            "title": "女神还没拉完吗？",
-//                            "type": 1
-//                    }
-//                    ],
-//                    "currentPage": 1,
-//                            "maxResult": 20,
-//                            "ret_code": 0
-//                }
-//                }
-
-                Gson gson = new Gson();
-                java.lang.reflect.Type type = new TypeToken<JokeInfoBean>() {
-                }.getType();
-                JokeInfoBean jokeInfoBean = gson.fromJson(result, type);
-                List<JokeInfoBean.ShowapiResBodyEntity.ContentlistEntity> list = jokeInfoBean.getShowapi_res_body().getContentlist();
-                //没必要再写一个beanlist存储bean
-                for (JokeInfoBean.ShowapiResBodyEntity.ContentlistEntity bean : list) {
-                    beanList.add(bean);
-                }
-                myAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onError(Throwable ex, boolean isOnCallback) {
-                boolean hasError = true;
-                if (ex instanceof HttpException) { // 网络错误
-                    HttpException httpEx = (HttpException) ex;
-                    int responseCode = httpEx.getCode();
-                    String responseMsg = httpEx.getMessage();
-                    String errorResult = httpEx.getResult();
-                    LogUtil.d(responseCode + responseMsg + errorResult);
-                } else { // 其他错误
-                    LogUtil.d(ex + "");
-                }
-            }
-
-            @Override
-            public void onCancelled(CancelledException cex) {
-//                Toast.makeText(MainActivity.this, cex + "", Toast.LENGTH_LONG).show();
-
-            }
-
-            @Override
-            public void onFinished() {
-                if (!hasError && result != null) {
-                    // 成功获取数据
-//                    Toast.makeText(x.app(), result, Toast.LENGTH_LONG).show();
-                }
-            }
-        });
 
     }
+
+
+
 
     /**
      * 模拟下拉刷新时获取新数据
@@ -207,30 +152,12 @@ public class MainActivity extends BaseActivity
     @Override
     public void onRefresh() {
 
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                beanList.clear();
-                mSwipeRefreshLayout.setRefreshing(true); //请求开始的时候
-                requestData(1);
-                mSwipeRefreshLayout.setRefreshing(false); // xx 请求结束的时候
-            }
-        }, 1000);
+
     }
 
     @Override
     public void onLoadMore(AbsListView view) {
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                page++;
-                requestData(page);
-                loadMoreListView.onLoadMoreComplete();  //false
-                loadMoreListView.setNoMoreToLoad(false); //有可加载数据
-//                loadMoreListView.setNoMoreToLoad(true); //数据全部加载完成
 
-            }
-        }, 1000);
     }
 
     @Override
@@ -289,4 +216,52 @@ public class MainActivity extends BaseActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
+    /**
+     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+                case 0: {
+                    return new HomeFragment();
+                }
+                case 1: {
+                    return new HomeFragment();
+                }
+                case 2: {
+                    return new HomeFragment();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public int getCount() {
+            return 3;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "纯图";
+                case 1:
+                    return "纯文";
+                case 2:
+                    return "视频";
+            }
+            return null;
+        }
+    }
 }
+
+

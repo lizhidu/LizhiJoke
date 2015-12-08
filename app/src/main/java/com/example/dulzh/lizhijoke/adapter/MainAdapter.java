@@ -66,7 +66,7 @@ public class MainAdapter extends BaseAdapter {
         //标题
         viewHolder.tvTitle.setText(beanList.get(position).getTitle());
         //时间
-        if ((beanList.get(position).getCt().substring(0, 10)).trim().equalsIgnoreCase(new SimpleDateFormat("yyyy-MM-dd").format(new Date()).trim())) {
+        if ((beanList.get(position).getCt().substring(0, 10)).equals(new SimpleDateFormat("yyyy-MM-dd").format(new Date()))) {
             viewHolder.tvTime.setText("最新 " + beanList.get(position).getCt().substring(11, 16));
         } else {
             viewHolder.tvTime.setText(beanList.get(position).getCt().substring(0, 16));
@@ -89,8 +89,8 @@ public class MainAdapter extends BaseAdapter {
         TextView tvTime;
         @Bind(R.id.tv_content)
         TextView tvContent;
-        @Bind(R.id.btn_share)
-        Button btnShare;
+        @Bind(R.id.iv_share)
+        ImageView ivShare;
 
         ViewHolder(View view) {
             ButterKnife.bind(this, view);

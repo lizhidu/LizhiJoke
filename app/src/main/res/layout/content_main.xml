@@ -4,40 +4,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundColor"
+    android:background="@android:color/white"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.example.dulzh.lizhijoke.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/mSwipeRefreshLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <!--<android.support.v4.widget.SwipeRefreshLayout-->
+        <!--android:id="@+id/mSwipeRefreshLayout"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <!--&lt;!&ndash;<FrameLayout&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="match_parent">&ndash;&gt;-->
 
-            <com.example.dulzh.lizhijoke.widget.LoadMoreListView
-                android:id="@+id/loadMoreListView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:divider="@color/backgroundColor"
-                android:dividerHeight="10dp">
+            <!--<com.example.dulzh.lizhijoke.widget.LoadMoreListView-->
+                <!--android:id="@+id/loadMoreListView"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:divider="@color/backgroundColor"-->
+                <!--android:dividerHeight="10dp">-->
 
-            </com.example.dulzh.lizhijoke.widget.LoadMoreListView>
+            <!--</com.example.dulzh.lizhijoke.widget.LoadMoreListView>-->
 
-            <TextView
-                android:id="@+id/tv_no_data"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="暂无数据"
-                android:textColor="#000000"
-                android:textSize="20sp" />
+            <!--<TextView-->
+                <!--android:id="@+id/tv_no_data"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:gravity="center"-->
+                <!--android:text="暂无数据"-->
+                <!--android:textColor="#000000"-->
+                <!--android:textSize="20sp" />-->
 
-        </FrameLayout>
+        <!--&lt;!&ndash;</FrameLayout>&ndash;&gt;-->
 
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    <!--</android.support.v4.widget.SwipeRefreshLayout>-->
 </RelativeLayout>

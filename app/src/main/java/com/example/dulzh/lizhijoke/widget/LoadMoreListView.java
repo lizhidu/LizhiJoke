@@ -35,7 +35,7 @@ public class LoadMoreListView extends ListView implements AbsListView.OnScrollLi
 
 
     //初始化可拉动y轴方向距离
-    private static final int MAX_Y_OVERSCROLL_DISTANCE = 50;
+    private static final int MAX_Y_OVERSCROLL_DISTANCE = 20;
     //实际可上下拉动Y轴上的距离
     private int mMaxYOverscrollDistance;
     //上下文环境
