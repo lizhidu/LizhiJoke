@@ -5,4 +5,5 @@ package com.example.dulzh.lizhijoke.utils;
  */
 public class Common {
     public static String URL_JOKEINFO = "http://apis.baidu.com/showapi_open_bus/showapi_joke/joke_text";
+    public static String URL_JOKE_IMG = "http://apis.baidu.com/showapi_open_bus/showapi_joke/joke_pic";
 }

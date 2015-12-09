@@ -1,7 +1,6 @@
 package com.example.dulzh.lizhijoke;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -19,25 +18,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView;
-import android.widget.TextView;
 
-import com.example.dulzh.lizhijoke.adapter.MainAdapter;
-import com.example.dulzh.lizhijoke.bean.JokeInfoBean;
-import com.example.dulzh.lizhijoke.fragment.HomeFragment;
-import com.example.dulzh.lizhijoke.utils.Common;
+import com.example.dulzh.lizhijoke.fragment.OnlyImageFragment;
+import com.example.dulzh.lizhijoke.fragment.OnlyTextFragment;
 import com.example.dulzh.lizhijoke.widget.LoadMoreListView;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import org.xutils.common.Callback;
 import org.xutils.common.util.LogUtil;
-import org.xutils.ex.HttpException;
-import org.xutils.http.RequestParams;
-import org.xutils.x;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -107,9 +93,6 @@ public class MainActivity extends BaseActivity
         });
 
 
-
-
-
         //模拟数据
 //        for (int i = 0; i < 20; i++) {
 //            Map<String, Object> listItem = new HashMap<>();
@@ -119,8 +102,6 @@ public class MainActivity extends BaseActivity
 //        }
 
     }
-
-
 
 
     /**
@@ -232,13 +213,13 @@ public class MainActivity extends BaseActivity
         public Fragment getItem(int position) {
             switch (position) {
                 case 0: {
-                    return new HomeFragment();
+                    return new OnlyImageFragment();
                 }
                 case 1: {
-                    return new HomeFragment();
+                    return new OnlyTextFragment();
                 }
                 case 2: {
-                    return new HomeFragment();
+                    return new OnlyTextFragment();
                 }
             }
             return null;
@@ -253,10 +234,13 @@ public class MainActivity extends BaseActivity
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
+
                     return "纯图";
                 case 1:
+
                     return "纯文";
                 case 2:
+
                     return "视频";
             }
             return null;
