@@ -1,6 +1,5 @@
 package com.example.dulzh.lizhijoke.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -8,15 +7,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.TextView;
 
 import com.example.dulzh.lizhijoke.BaseFragment;
 import com.example.dulzh.lizhijoke.MyApplication;
 import com.example.dulzh.lizhijoke.R;
-import com.example.dulzh.lizhijoke.activity.BigImageActivity;
 import com.example.dulzh.lizhijoke.adapter.OnlyImageAdapter;
 import com.example.dulzh.lizhijoke.bean.JokeImgBean;
+import com.example.dulzh.lizhijoke.loadingview.LoadingView;
 import com.example.dulzh.lizhijoke.utils.Common;
 import com.example.dulzh.lizhijoke.widget.LoadMoreListView;
 import com.google.gson.Gson;
@@ -32,11 +30,16 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * create an instance of this fragment.
  */
 public class OnlyImageFragment extends BaseFragment implements LoadMoreListView.OnLoadMoreListener, SwipeRefreshLayout.OnRefreshListener {
 
+    @Bind(R.id.loadView)
+    LoadingView loadView;
     private Handler mHandler = new Handler();
     //    private ArrayList<Map<String, Object>> mData = new ArrayList<Map<String, Object>>();
     private ArrayList<JokeImgBean.ShowapiResBodyEntity.ContentlistEntity> beanList = new ArrayList<>();
@@ -53,8 +56,8 @@ public class OnlyImageFragment extends BaseFragment implements LoadMoreListView.
         View view = inflater.inflate(R.layout.fragment_image, container, false);
         // 获取loadmorelistview，实现加载更多监听事件
         loadMoreListView = (LoadMoreListView) view.findViewById(R.id.loadMoreListView);
-        TextView textView = (TextView) view.findViewById(R.id.tv_no_data);
-        loadMoreListView.setEmptyView(textView);
+//        TextView textView = (TextView) view.findViewById(R.id.tv_no_data);
+//        loadMoreListView.setEmptyView(textView);
         loadMoreListView.setOnLoadMoreListener(this);
 
         requestData(1);
@@ -64,6 +67,9 @@ public class OnlyImageFragment extends BaseFragment implements LoadMoreListView.
 
 
         myAdapter.notifyDataSetChanged();
+//        if (beanList.size() == 0) {
+//            loadView.setVisibility(View.GONE);
+//        }
 
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.mSwipeRefreshLayout);
@@ -73,6 +79,7 @@ public class OnlyImageFragment extends BaseFragment implements LoadMoreListView.
                 android.R.color.holo_red_light);
         mSwipeRefreshLayout.setOnRefreshListener(this);
 
+        ButterKnife.bind(this, view);
         return view;
     }
 
@@ -126,7 +133,7 @@ public class OnlyImageFragment extends BaseFragment implements LoadMoreListView.
 //                            "ret_code": 0
 //                }
 //                }
-
+                loadView.setVisibility(View.GONE);
                 Gson gson = new Gson();
                 Type type = new TypeToken<JokeImgBean>() {
                 }.getType();
@@ -197,5 +204,11 @@ public class OnlyImageFragment extends BaseFragment implements LoadMoreListView.
                 mSwipeRefreshLayout.setRefreshing(false); // xx 请求结束的时候
             }
         }, 1000);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
     }
 }

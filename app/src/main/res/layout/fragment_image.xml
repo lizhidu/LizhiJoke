@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/nav_header_height"
+    android:layout_height="match_parent"
     android:orientation="vertical"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
@@ -31,8 +32,18 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="暂无数据"
+            android:visibility="gone"
             android:textColor="#000000"
             android:textSize="20sp" />
+
+        <com.example.dulzh.lizhijoke.loadingview.LoadingView
+            android:id="@+id/loadView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            app:loadingText="加载中..." />
     </FrameLayout>
+
+
 
 </LinearLayout>

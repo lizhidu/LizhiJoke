@@ -11,4 +11,6 @@
     <color name="listviewItem">#FFFFFF</color>
     <color name="tab_text">#3F51B5</color>
     <color name="tab_text_selected">#5D6CC0</color>
+    <color name="Translucent">#32000000</color>
+
 </resources>

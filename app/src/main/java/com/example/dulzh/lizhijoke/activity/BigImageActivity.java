@@ -1,6 +1,7 @@
 package com.example.dulzh.lizhijoke.activity;
 
 import android.os.Bundle;
+import android.view.Window;
 import android.widget.ImageView;
 
 import com.example.dulzh.lizhijoke.BaseActivity;
