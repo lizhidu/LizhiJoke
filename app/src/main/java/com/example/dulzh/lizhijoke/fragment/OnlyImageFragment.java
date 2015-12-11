@@ -2,9 +2,14 @@ package com.example.dulzh.lizhijoke.fragment;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.TextView;
@@ -19,6 +24,7 @@ import com.example.dulzh.lizhijoke.utils.Common;
 import com.example.dulzh.lizhijoke.widget.LoadMoreListView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.nineoldandroids.animation.ObjectAnimator;
 
 import org.xutils.common.Callback;
 import org.xutils.common.util.LogUtil;
@@ -40,6 +46,11 @@ public class OnlyImageFragment extends BaseFragment implements LoadMoreListView.
 
     @Bind(R.id.loadView)
     LoadingView loadView;
+    @Bind(R.id.mToolbar)
+    Toolbar mToolbar;
+
+    ObjectAnimator mAnimator;
+
     private Handler mHandler = new Handler();
     //    private ArrayList<Map<String, Object>> mData = new ArrayList<Map<String, Object>>();
     private ArrayList<JokeImgBean.ShowapiResBodyEntity.ContentlistEntity> beanList = new ArrayList<>();
@@ -47,7 +58,12 @@ public class OnlyImageFragment extends BaseFragment implements LoadMoreListView.
     private static int page = 1;
     private LoadMoreListView loadMoreListView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-
+    private static int mTouchSlop;
+    private TabLayout tabs;
+    private float mFirstY, mCurrentY;//记录当前和原先的坐标
+    private int direction; //记录滑动方向
+    private boolean mShow = true; //隐藏和显示表示
+    private ViewPager viewPager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -56,20 +72,24 @@ public class OnlyImageFragment extends BaseFragment implements LoadMoreListView.
         View view = inflater.inflate(R.layout.fragment_image, container, false);
         // 获取loadmorelistview，实现加载更多监听事件
         loadMoreListView = (LoadMoreListView) view.findViewById(R.id.loadMoreListView);
-//        TextView textView = (TextView) view.findViewById(R.id.tv_no_data);
-//        loadMoreListView.setEmptyView(textView);
+        TextView textView = (TextView) view.findViewById(R.id.tv_no_data);
+        loadMoreListView.setEmptyView(textView);
+        View header = new View(getActivity());
+        header.setLayoutParams(new AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, (int) getResources().getDimension(R.dimen.abc_action_bar_default_height_material)));
+        loadMoreListView.addHeaderView(header);
+        mTouchSlop = ViewConfiguration.get(this.getActivity()).getScaledTouchSlop(); //获取最低滑动距离
+
         loadMoreListView.setOnLoadMoreListener(this);
+        tabs = (TabLayout) getActivity().findViewById(R.id.tabs);
+        viewPager = (ViewPager) getActivity().findViewById(R.id.container);
+        //listview的事件分发机制
+        loadMoreListView.setOnTouchListener(myTouchListener);
 
         requestData(1);
         //添加listview的adapter
         myAdapter = new OnlyImageAdapter(this.getActivity(), beanList);
         loadMoreListView.setAdapter(myAdapter);
-
-
         myAdapter.notifyDataSetChanged();
-//        if (beanList.size() == 0) {
-//            loadView.setVisibility(View.GONE);
-//        }
 
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.mSwipeRefreshLayout);
@@ -81,6 +101,59 @@ public class OnlyImageFragment extends BaseFragment implements LoadMoreListView.
 
         ButterKnife.bind(this, view);
         return view;
+    }
+
+    View.OnTouchListener myTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mFirstY = event.getY();
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    mCurrentY = event.getY();
+                    if (mCurrentY - mFirstY > mTouchSlop) {
+                        direction = 0;// down
+
+                        LogUtil.d(mCurrentY+"-"+mFirstY+"---"+mTouchSlop);
+                    } else if (mFirstY - mCurrentY > mTouchSlop) {
+                        direction = 1;// up
+                        LogUtil.d(mCurrentY+"-"+mFirstY+"---"+mTouchSlop);
+
+                    }
+                    if (direction == 1) {
+                        if (mShow) {
+                            toolbarAnim(1);//show
+                            mShow = !mShow;
+                        }
+                    } else if (direction == 0) {
+                        if (!mShow) {
+                            toolbarAnim(0);//hide
+                            mShow = !mShow;
+                        }
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    break;
+            }
+            return false;
+        }
+    };
+
+
+    private void toolbarAnim(int flag) {
+        if (mAnimator != null && mAnimator.isRunning()) {
+            mAnimator.cancel();
+        }
+        if (flag == 0) {
+            mAnimator = ObjectAnimator.ofFloat(mToolbar,
+                    "translationY", mToolbar.getTranslationY(), 0);
+        } else {
+            mAnimator = ObjectAnimator.ofFloat(mToolbar,
+                    "translationY", mToolbar.getTranslationY(),
+                    -mToolbar.getHeight());
+        }
+        mAnimator.start();
     }
 
     private void requestData(int page) {
